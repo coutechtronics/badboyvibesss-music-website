@@ -1,219 +1,130 @@
+// app/page.tsx
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+import { unstable_noStore as noStore } from "next/cache";
 
 import Newsletter from "./component/Newsletter";
 import Footer from "./component/Footer/Footer";
+import TourSection from "./component/Tour/TourSection";
+import AnnouncementSection from "./component/Announcement/Announcement";
+import MusicSection from "./component/Music/MusicSection";
+import VideoSection from "./component/Video/VideoSection";
+import FeaturedRelease from "./component/FeaturedRelease/FeaturedRelease";
+import { supabase } from "@/app/lib/supabase";
 
-export default function Home() {
+export default async function Home() {
+  noStore();
+
+  const [
+    { data: music, error: musicErr },
+    { data: announcements, error: annErr },
+    { data: tours, error: tourErr },
+    { data: videos, error: vidErr },
+  ] = await Promise.all([
+    supabase.from("music").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("announcements")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false }),
+    supabase.from("tours").select("*").order("date", { ascending: true }),
+    supabase.from("videos").select("*").order("created_at", { ascending: false }),
+  ]);
+
+  if (musicErr) console.error("music fetch error:", musicErr.message);
+  if (annErr) console.error("announcements fetch error:", annErr.message);
+  if (tourErr) console.error("tours fetch error:", tourErr.message);
+  if (vidErr) console.error("videos fetch error:", vidErr.message);
+
+  const featured =
+  (music ?? []).find((m: any) => m.is_featured) ?? (music ?? [])[0] ?? null;
+
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* NAVBAR */}
-      <header className="flex items-center justify-between px-10 py-6">
-        <div className="text-xl font-extrabold tracking-widest uppercase">
-          badboyvibesss
-        </div>
+    <main className="min-h-screen bg-black text-white overflow-x-hidden">
+      {/* ================= HEADER ================= */}
+      <header className="fixed top-0 left-0 w-full z-50 pointer-events-none">
+        <div className="pointer-events-auto max-w-7xl mx-auto px-4 md:px-10 py-5 flex items-center justify-between">
+          <div className="text-sm md:text-lg font-extrabold tracking-widest uppercase">
+            BADBOYVIBES
+          </div>
 
-        <nav className="flex gap-8 text-xs uppercase tracking-widest">
-          <a href="#music" className="hover:text-gray-400">Music</a>
-          <a href="#videos" className="hover:text-gray-400">Videos</a>
-          <a href="#tour" className="hover:text-gray-400">Tour</a>
-          <a href="#signup" className="hover:text-gray-400">Sign Up</a>
-        </nav>
+          <nav className="hidden md:flex items-center gap-8 text-xs tracking-widest uppercase">
+            <a href="#music" className="hover:text-gray-300 transition">
+              Music
+            </a>
+            <a href="#videos" className="hover:text-gray-300 transition">
+              Videos
+            </a>
+            <a href="#tour" className="hover:text-gray-300 transition">
+              Tour
+            </a>
+            <a href="#signup" className="hover:text-gray-300 transition">
+              Sign Up
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-4 md:gap-5">
+            <a href="#" aria-label="Instagram" className="hover:text-gray-300 transition">
+              <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5.3a4.7 4.7 0 100 9.4 4.7 4.7 0 000-9.4zm6-1.8a1.1 1.1 0 11-2.2 0 1.1 1.1 0 012.2 0z" />
+              </svg>
+            </a>
+
+            <a href="#" aria-label="X" className="hover:text-gray-300 transition">
+              <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.9 2H22l-7.5 8.6L23 22h-6.7l-5.2-6.8L5 22H2l8-9.2L1 2h6.8l4.7 6.2L18.9 2z" />
+              </svg>
+            </a>
+
+            <a href="#" aria-label="YouTube" className="hover:text-gray-300 transition">
+              <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23 12s0-4.6-.6-6.7a3 3 0 00-2.1-2.1C18.2 2.6 12 2.6 12 2.6s-6.2 0-8.3.6A3 3 0 001.6 5.3C1 7.4 1 12 1 12s0 4.6.6 6.7a3 3 0 002.1 2.1c2.1.6 8.3.6 8.3.6s6.2 0 8.3-.6a3 3 0 002.1-2.1c.6-2.1.6-6.7.6-6.7zM10 15.5v-7l6 3.5-6 3.5z" />
+              </svg>
+            </a>
+
+            <a href="#" aria-label="TikTok" className="hover:text-gray-300 transition">
+              <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 2h2a6 6 0 005 5v2a8 8 0 01-7-4v9.3a5.7 5.7 0 11-5.7-5.7h.7v2.9h-.7a2.8 2.8 0 102.8 2.8V2z" />
+              </svg>
+            </a>
+          </div>
+        </div>
       </header>
 
-      {/* HERO */}
-      <section className="flex items-center justify-center h-[85vh] text-center px-6">
-        <div>
-          <h1 className="text-6xl md:text-8xl font-extrabold tracking-widest uppercase">
+      {/* ================= HERO ================= */}
+      <section className="relative h-[100svh] w-full overflow-hidden">
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          src="/vibes.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="none"
+        />
+        <div className="absolute inset-0 bg-black/60" />
+
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+          <h1 className="text-[42px] md:text-[120px] font-extrabold tracking-[0.2em] uppercase">
             badboyvibesss
           </h1>
-
-          <p className="mt-6 text-sm md:text-base text-gray-400 tracking-wide">
+          <p className="mt-4 text-xs tracking-[0.35em] text-gray-300 uppercase">
             Music • Culture • Energy
           </p>
         </div>
       </section>
 
-      {/* MUSIC SECTION */}
-      <section id="music" className="px-10 pb-24">
-        <h2 className="text-sm uppercase tracking-widest text-gray-400 mb-10">
-          Music
-        </h2>
+      {/* ================= FEATURED RELEASE ================= */}
+      <FeaturedRelease item={featured} />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {/* MUSIC CARD */}
-          {[
-            { title: "Track One", link: "#" },
-            { title: "Track Two", link: "#" },
-            { title: "Track Three", link: "#" },
-            { title: "Track Four", link: "#" },
-          ].map((track, index) => (
-            <a
-              key={index}
-              href={track.link}
-              target="_blank"
-              className="group"
-            >
-              <div className="aspect-square bg-gray-800 relative overflow-hidden">
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                  <span className="text-xs uppercase tracking-widest">
-                    Play
-                  </span>
-                </div>
-              </div>
-
-              <p className="mt-3 text-sm tracking-wide">
-                {track.title}
-              </p>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      {/* VIDEOS SECTION */}
-<section id="videos" className="px-10 py-24 text-center">
-  <h2 className="text-4xl font-bold tracking-widest mb-16">
-    VIDEO$
-  </h2>
-
-  <div className="relative max-w-4xl mx-auto">
-    {/* Video Frame */}
-    <div className="aspect-video bg-gray-800 relative flex items-center justify-center">
-      {/* Play Button */}
-      <div className="w-16 h-16 rounded-full bg-yellow-500 flex items-center justify-center">
-        ▶
-      </div>
-
-      {/* Arrows */}
-      <button className="absolute left-4 text-white text-2xl">
-        ‹
-      </button>
-      <button className="absolute right-4 text-white text-2xl">
-        ›
-      </button>
-    </div>
-
-    {/* Video Title */}
-    <p className="mt-6 text-lg font-medium">
-      Featured Video Title
-    </p>
-
-    {/* Dots */}
-    <div className="flex justify-center gap-2 mt-4">
-      <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-      <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-      <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-    </div>
-  </div>
-</section>
-
-{/* ANNOUNCEMENT SECTION */}
-<section className="relative py-24 bg-black">
-  <div className="max-w-6xl mx-auto px-10 text-center space-y-4">
-
-    <p className="text-yellow-500 text-xl font-semibold tracking-wide">
-      🏆 Billboard African Rookie of the Month
-    </p>
-
-    <p className="text-gray-500 text-sm uppercase tracking-widest">
-      New announcements coming soon
-    </p>
-
-  </div>
-</section>
-<section className="relative py-32 bg-[#2b1a24] text-white">
-  <div className="max-w-6xl mx-auto px-10">
-
-    {/* Title */}
-    <h2 className="text-6xl font-extrabold tracking-widest mb-16">
-      TOUR
-    </h2>
-
-    {/* Tour list */}
-    <div className="space-y-10">
-
-      {/* Tour item */}
-      <div className="flex items-center justify-between border-b border-yellow-500/30 pb-6">
-        <div className="space-y-1">
-          <p className="text-yellow-400 font-semibold">
-            Tuesday, December 16th 2025
-          </p>
-          <p className="text-sm text-gray-300">
-            Amore Gardens · Lagos, Nigeria
-          </p>
-        </div>
-
-        <a
-          href="#"
-          className="text-yellow-400 uppercase tracking-widest text-sm hover:underline"
-        >
-          Tickets →
-        </a>
-      </div>
-
-      {/* Tour item */}
-      <div className="flex items-center justify-between border-b border-yellow-500/30 pb-6">
-        <div className="space-y-1">
-          <p className="text-yellow-400 font-semibold">
-            Coming Soon
-          </p>
-          <p className="text-sm text-gray-300">
-            Coming Soon
-          </p>
-        </div>
-
-        <span className="text-gray-500 uppercase tracking-widest text-sm">
-          Tickets →
-        </span>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<section className="bg-black py-32">
-  <div className="max-w-7xl mx-auto px-10 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-
-    {/* LEFT */}
-    <div className="space-y-6">
-      <p className="text-xs tracking-widest text-gray-500 uppercase">
-        Project · Comic
-      </p>
-
-      <h2 className="text-4xl md:text-6xl font-bold text-white">
-        Sanko: <br /> The Series
-      </h2>
-
-      <p className="text-gray-400 leading-relaxed max-w-md">
-        In this narrative, Kiloibuzzy recounts an event wherein
-        Philomena engaged in intimate relations with Emeka
-        clandestinely, yet Ukangbe maintained transparency,
-        acknowledging his desire for reciprocity in their relationship.
-      </p>
-
-      <p className="text-xs text-gray-500 uppercase tracking-widest">
-        Sanko — Issue 01
-      </p>
-
-      <button className="mt-4 inline-block border border-yellow-500 text-yellow-500 px-6 py-3 uppercase text-sm tracking-widest hover:bg-yellow-500 hover:text-black transition">
-        Listen Now
-      </button>
-    </div>
-
-    {/* RIGHT */}
-    <div className="relative">
-      <img
-        src="/sanko-cover.jpg"
-        alt="Sanko The Series"
-        className="w-full rounded-lg"
-      />
-    </div>
-
-  </div>
-</section>
-
-<Newsletter />
-<Footer />
-
+      {/* ================= CONTENT ================= */}
+      <MusicSection music={music ?? []} />
+      <VideoSection videos={videos ?? []} />
+      <AnnouncementSection announcements={announcements ?? []} />
+      <TourSection tours={tours ?? []} />
+      <Newsletter />
+      <Footer />
     </main>
   );
 }

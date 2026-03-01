@@ -1,12 +1,28 @@
-import "./announcement.css";
+"use client";
 
-export default function Announcement() {
+type Announcement = { id?: string; text: string };
+
+export default function AnnouncementSection({
+  announcements = [],
+}: { announcements: Announcement[] }) {
+  if (!announcements.length) return null;
+
+  // Repeat enough times so the track is long
+  const repeated = Array.from({ length: 6 }, () => announcements).flat();
+
   return (
-    <section className="announcement">
+    <section className="bg-black border-y border-white/10 py-4 overflow-hidden">
       <div className="marquee">
-        <span>🏆 Billboard African Rookie of the Month</span>
-        <span>🔥 New single dropping soon</span>
-        <span>🎥 2M views on latest video</span>
+        <div className="marquee__track">
+          {repeated.map((item, i) => (
+            <span
+              key={`${item.id ?? "a"}-${i}`}
+              className="text-yellow-500 uppercase tracking-widest text-sm"
+            >
+              {item.text}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );
